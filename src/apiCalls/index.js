@@ -10,7 +10,7 @@ const guessDefaultApi = () => {
   } catch {
     //ignore
   }
-  return 'https://sri-balaji-motors-api.onrender.com/api';
+  return 'https://sbm-server.onrender.com/api';
 };
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || guessDefaultApi();
 
