@@ -11,11 +11,10 @@ import { getBranch, listBranchesPublic } from "../apiCalls/branches";
 import { listUsersPublic } from "../apiCalls/adminUsers";
 import { normalizeKey, uniqCaseInsensitive } from "../utils/caseInsensitive";
 import { saveBookingViaWebhook, reserveQuotationSerial } from "../apiCalls/forms";
+import { normalizeBranchId } from "../utils/branchHelpers";
+import { buildModuleUrl } from "../config/gasEndpoints";
 // GAS webhook for Quotation save/search/nextSerial
-// Default set in code so it works even without env var
-const DEFAULT_QUOT_GAS_URL =
-  "https://script.google.com/macros/s/AKfycby0YV2E2Ryb4YehYRzBistMW4sWN3XDcqaEfgkfRvEjmaKNVKq2Ubi3ul50AbxO6TVPJA/exec";
-const QUOT_GAS_URL = import.meta.env.VITE_QUOTATION_GAS_URL || DEFAULT_QUOT_GAS_URL;
+const QUOT_GAS_URL = buildModuleUrl("quotation", import.meta.env.VITE_QUOTATION_GAS_URL);
 
 
 /* ======================
@@ -243,8 +242,7 @@ const validateCore = async (form) => {
    ====================== */
 export default function Quotation() {
   const [form] = Form.useForm();
-
-  const [brand, setBrand] = useState("SHANTHA"); // "SHANTHA" | "NH"
+  const brand = "SHANTHA";
 
   const [bikeData, setBikeData] = useState([]);
   const [company, setCompany] = useState("");
@@ -279,7 +277,7 @@ export default function Quotation() {
   const [docsReq, setDocsReq] = useState(DOCS_REQUIRED);
   const [extraVehicles, setExtraVehicles] = useState([]); // up to 3 records (V2..V4)
   const [userStaffName, setUserStaffName] = useState();
-  const [userRole, setUserRole] = useState("");
+  const [ setUserRole] = useState("");
   // Defaults for restore if fields get cleared
   const [defaultBranchName, setDefaultBranchName] = useState("");
   const [allowedBranches, setAllowedBranches] = useState([]); // [{id,name,code}]
@@ -457,20 +455,29 @@ export default function Quotation() {
           if (codeFromUser) { setBranchCode(codeFromUser); try { form.setFieldsValue({ branchCode: codeFromUser }); } catch {
             //iuf
           } }
+          if (staffName) {
+            const immediatePatch = {};
+            immediatePatch.executive = staffName;
+            if (branchName) immediatePatch.branch = branchName;
+            form.setFieldsValue(immediatePatch);
+          } else if (branchName) {
+            form.setFieldsValue({ branch: branchName });
+          }
           // Always try to resolve branch code via branchId if available
           const branchIdLocal = (user?.formDefaults && (user.formDefaults.branchId?._id || user.formDefaults.branchId || null))
             || (user?.primaryBranch && (user.primaryBranch?._id || user.primaryBranch || null))
             || (Array.isArray(user?.branches) && user.branches.length ? (user.branches[0]?._id || user.branches[0] || null) : null);
+          const normalizedBranchId = normalizeBranchId(branchIdLocal);
 
-          if (branchIdLocal) {
+          if (normalizedBranchId) {
             try {
-              const br = await getBranch(String(branchIdLocal)).catch(() => null);
+              const br = await getBranch(normalizedBranchId).catch(() => null);
               if (br?.success && br?.data) {
                 if (!branchName) branchName = br.data.name;
                 if (br?.data?.code && !branchCode) {
                   const code = String(br.data.code).toUpperCase();
                   setBranchCode(code);
-                  setBranchId(String(br.data.id || branchIdLocal));
+                  setBranchId(String(br.data.id || normalizedBranchId));
                   try { form.setFieldsValue({ branchCode: code }); } catch {
                     //gufg
                   }
@@ -634,13 +641,6 @@ export default function Quotation() {
     setPendingLoaded(false);
     loadPendingCases({ silent: true });
   }, [pendingBranchReady, pendingBranch]);
-
-  useEffect(() => {
-    if (brand === "NH") {
-      form.setFieldsValue({ executive: MEGHANA_NAME });
-      form.setFieldsValue({ branch: BRANCH_NAME });
-    }
-  }, [brand, form]);
 
   useEffect(() => {
     if (vehicleType === "scooter") {
@@ -968,7 +968,6 @@ export default function Quotation() {
 
   const resetForm = () => {
     form.resetFields();
-    setBrand("SHANTHA");
     setCompany("");
     setModel("");
     setVariant("");
@@ -1186,7 +1185,7 @@ export default function Quotation() {
         return;
       }
 
-      const showroomName = (brand === "SHANTHA" ? "Shantha Motors" : "NH Motors");
+      const showroomName = "SRI BALAJI MOTORS";
       const name = (form.getFieldValue("name") || "-").trim();
 
       // V1 (main)
@@ -1220,7 +1219,7 @@ export default function Quotation() {
       const header = [
         `*Hi ${name}, Welcome to ${showroomName}! 🏍️*`,
         `Multi-brand two-wheeler sales, service, spares, exchange, finance & insurance`,
-        `*Mob No - 9731366921 / 8073283502*`,
+        `*Mob No - 9742192972 / 9901925546*`,
         ``,
         `• *Quotation Date:* ${qDate}`,
       ];
@@ -1257,8 +1256,7 @@ export default function Quotation() {
         ``,
         `• *Sales Executive:* ${execNameDisplay} (${execPhone || '-'})`,
         `*Our Locations* 📍`,
-        `Muddinapalya • Hegganahalli • Nelagadrahalli • Andrahalli`,
-        `Kadabagere • Channenahalli • Tavarekere `,
+        `Chikkagollarahatti • Pattegarapalya `,
         ``,
         `• *Note:* Prices are indicative and may change without prior notice.`,
         ``,
@@ -1377,28 +1375,23 @@ export default function Quotation() {
           >
             <Row gutter={[12, 8]}>
               <Col span={24}>
-                <div
-                  className="brand-actions-row"
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr auto",
-                    alignItems: "center",
-                    gap: 12,
-                  }}
-                >
-                  <Form.Item label="Brand on Print" style={{ marginBottom: 0 }}>
-                    <Radio.Group value={brand} onChange={(e)=>setBrand(e.target.value)}>
-                      <Radio value="SHANTHA">Shantha Motors</Radio>
-                      <Radio value="NH">NH Motors (Honda)</Radio>
-                    </Radio.Group>
-                  </Form.Item>
-                  {/* Right-side stacked buttons */}
-                  <div className="brand-actions" style={{ display: "flex", flexDirection: "row", gap: 8, alignItems: 'center' }}>
+          <div
+            className="brand-actions-row"
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              gap: 8,
+              alignItems: "center",
+              justifyContent: "flex-end",
+            }}
+          >
+            
+            {/* Right-side stacked buttons */}
+            <div className="brand-actions" style={{ display: "flex", flexDirection: "row", gap: 8, alignItems: 'center' }}>
                     <FetchQuot
                       form={form}
                       webhookUrl={QUOT_GAS_URL}
                       EXECUTIVES={EXECUTIVES}
-                      setBrand={setBrand}
                       setMode={setMode}
                       setVehicleType={setVehicleType}
                       setFittings={setFittings}
@@ -2016,9 +2009,7 @@ export default function Quotation() {
                   alignItems: "center",
                 }}
               >
-                {/* LEFT: brand names + addresses + mobiles */}
                 <div>
-                  {/* Brand names horizontally */}
                   <div
                     style={{
                       display: "flex",
@@ -2031,53 +2022,27 @@ export default function Quotation() {
                       textOverflow: "ellipsis",
                     }}
                   >
-                    {brand === "SHANTHA" ? (
-                      <>
-                        <div className="title-kn" style={{ fontSize: "25pt", fontWeight: 800 }}>
-                          ಶಾಂತ ಮೋಟರ್ಸ್
-                        </div>
-                        <div className="title-en" style={{ fontSize: "20pt", fontWeight: 800 }}>
-                          Shantha Motors
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="title-knhonda" style={{ fontSize: "25pt", fontWeight: 800 }}>
-                          ಎನ್ ಎಚ್ ಮೋಟರ್ಸ್
-                        </div>
-                        <div className="title-en" style={{ fontSize: "18pt", fontWeight: 700 }}>
-                          NH Motors
-                        </div>
-                      </>
-                    )}
+                    <div className="title-kn" style={{ fontSize: "22pt", fontWeight: 700 }}>
+                      ಶ್ರೀ ಬಾಲಾಜಿ ಮೋಟರ್ಸ್
+                    </div>
+                    <div className="title-en" style={{ fontSize: "16pt", fontWeight: 700 }}>
+                      SRI BALAJI MOTORS
+                    </div>
                   </div>
-
-                  {/* Addresses + mobile */}
-                  {brand === "SHANTHA" ? (
-                    <>
-                      <div className="addr-line" style={{ fontSize: "13pt" }}>
-                        • Muddinapalya • Hegganahalli   • Nelagadrahalli  • Andrahalli
-                      </div>
-                      <div className="addr-line" style={{ fontSize: "13pt" }}>
-                        • Kadabagere   • Channenahali  • Tavarekere 
-                      </div>
-                      <div style={{ marginTop: 6, fontWeight: 600 }}>
-                        Mob: 9731366921 / 8073283502 / 9035131806
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="addr-linehonda" style={{ fontSize: "12pt" }}>
-                        Site No. 116/1, Bydarahalli, Magadi Main Road, Opp. HP Petrol Bunk, Bangalore - 560091
-                      </div>
-                      <div style={{ marginTop: 6, fontWeight: 600 }}>
-                        Mob: 9731366921 / 8073283502 / 9741609799
-                      </div>
-                    </>
-                  )}
+                  <div className="addr-line" style={{ fontSize: "15pt", fontWeight: 600 }}>
+                    Multi Brand Bike Showroom
+                  </div>
+                  <div className="addr-line" style={{ fontSize: "13pt" }}>
+                    #1, Below SBI Bank, Opp. to Sai Garments, Near NICE Road, Magadi Main Road, Chikkagollarahatti, Bangalore - 560091
+                  </div>
+                   <div className="addr-line" style={{ fontSize: "13pt" }}>
+                  #45, 60 Feet Road, Srinivasangara, Pattegarapalya Main Road, Pattegarapalya, Bangalore - 560079
+                  </div>
+                  <div style={{ marginTop: 6, fontWeight: 600 }}>
+                    Mob: 9742192972 / 9901925546
+                  </div>
+                  
                 </div>
-
-                {/* RIGHT: logo only */}
                 <div
                   className="brand-right"
                   style={{
@@ -2089,8 +2054,8 @@ export default function Quotation() {
                   }}
                 >
                   <img
-                    src={brand === "SHANTHA" ? "/shantha-logoprint.jpg" : "/honda-logo.png"}
-                    alt="Brand Logo"
+                    src="/sri-balaji-logoprint.jpg"
+                    alt="SRI BALAJI MOTORS Logo"
                     style={{
                       height: 130,
                       objectFit: "contain",
@@ -2229,7 +2194,7 @@ export default function Quotation() {
                   }}
                 >
                   <img
-                    src={"/shantha-access.png"}
+                    src={"/sri-balaji-access.png"}
                     alt="Accessories"
                     style={{ height: 140, margin: "6px 0" }}
                   />

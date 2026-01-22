@@ -21,20 +21,15 @@ import { saveBookingViaWebhook, saveJobcardViaWebhook } from "../apiCalls/forms"
 import PostServiceSheet from "./PostServiceSheet";
 import { handleSmartPrint } from "../utils/printUtils";
 import { exportToCsv } from "../utils/csvExport";
+import { buildModuleUrl } from "../config/gasEndpoints";
 
 const { Text } = Typography;
 
-const DEFAULT_BOOKING_GAS_URL =
-  "https://script.google.com/macros/s/AKfycbzAn8Ahu2Mp59Uh0i7jLi1XEzRU44A6xzrMl3X-n1u_EECxSAWCjpNo0Ovk4LeCjvPzeA/exec";
-const DEFAULT_JOBCARD_GAS_URL =
-  "https://script.google.com/macros/s/AKfycbwFqLWDHtZqh_s8LzYoKyD3k0J6ycVcnrtcQYMdK08UcCWzQqMl-mucIA4jnEKxTttDlg/exec";
+const BOOKING_GAS_URL = buildModuleUrl("booking", import.meta.env.VITE_BOOKING_GAS_URL);
+const JOBCARD_GAS_URL = buildModuleUrl("jobcard", import.meta.env.VITE_JOBCARD_GAS_URL);
 const GAS_SECRET = import.meta.env.VITE_JOBCARD_GAS_SECRET || "";
 const BOOKING_SECRET = import.meta.env.VITE_BOOKING_GAS_SECRET || "";
 
-const BOOKING_GAS_URL =
-  import.meta.env.VITE_BOOKING_GAS_URL || DEFAULT_BOOKING_GAS_URL;
-const JOBCARD_GAS_URL =
-  import.meta.env.VITE_JOBCARD_GAS_URL || DEFAULT_JOBCARD_GAS_URL;
 
 const ordinal = (n) => {
   const s = ["th", "st", "nd", "rd"];

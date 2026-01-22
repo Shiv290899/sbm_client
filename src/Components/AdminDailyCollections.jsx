@@ -4,14 +4,14 @@ import { Table, Space, Button, Select, message, Segmented, Grid, Modal, Form, In
 import { saveJobcardViaWebhook } from '../apiCalls/forms';
 import { listUsersPublic } from '../apiCalls/adminUsers';
 import { exportToCsv } from '../utils/csvExport';
+import { buildModuleUrl } from "../config/gasEndpoints";
 
 const { Text } = Typography;
 
 export default function AdminDailyCollections() {
   const screens = Grid.useBreakpoint();
   const isMobile = !screens.md;
-  const DEFAULT_JC_URL = 'https://script.google.com/macros/s/AKfycbwFqLWDHtZqh_s8LzYoKyD3k0J6ycVcnrtcQYMdK08UcCWzQqMl-mucIA4jnEKxTttDlg/exec';
-  const GAS_URL = import.meta.env.VITE_JOBCARD_GAS_URL || DEFAULT_JC_URL;
+  const GAS_URL = buildModuleUrl("jobcard", import.meta.env.VITE_JOBCARD_GAS_URL);
   const SECRET = import.meta.env.VITE_JOBCARD_GAS_SECRET || '';
   const readUser = () => { try { return JSON.parse(localStorage.getItem('user') || 'null'); } catch { return null; } };
   const me = useMemo(() => readUser(), []);

@@ -100,7 +100,7 @@ export default function Contact() {
           Contact & Locations
         </Title>
         <Text type="secondary">
-          Call, WhatsApp, or visit your nearest Shantha Motors showroom.
+          Call, WhatsApp, or visit your nearest SRI BALAJI MOTORS showroom.
         </Text>
       </Space>
 

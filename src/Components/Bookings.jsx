@@ -12,6 +12,7 @@ import { listBranchesPublic } from "../apiCalls/branches";
 import { listUsersPublic } from "../apiCalls/adminUsers";
 import { exportToCsv } from "../utils/csvExport";
 import { normalizeKey, uniqCaseInsensitive, toKeySet } from "../utils/caseInsensitive";
+import { buildModuleUrl } from "../config/gasEndpoints";
 
 const { Text } = Typography;
 
@@ -34,6 +35,8 @@ const HEAD = {
 };
 
 const pick = (obj, aliases) => String(aliases.map((k) => obj[k] ?? "").find((v) => v !== "") || "").trim();
+const BOOKING_GAS_URL = buildModuleUrl("booking", import.meta.env.VITE_BOOKING_GAS_URL);
+const BOOKING_GAS_SECRET = import.meta.env.VITE_BOOKING_GAS_SECRET || "";
 
 export default function Bookings() {
   const screens = Grid.useBreakpoint();
@@ -150,10 +153,8 @@ export default function Bookings() {
   useEffect(() => { loadDropdowns(); }, [loadDropdowns]);
 
   // Reuse the same GAS URL for list + print so search works
-  const DEFAULT_BOOKING_GAS_URL =
-    "https://script.google.com/macros/s/AKfycbzAn8Ahu2Mp59Uh0i7jLi1XEzRU44A6xzrMl3X-n1u_EECxSAWCjpNo0Ovk4LeCjvPzeA/exec";
-  const GAS_URL_STATIC = import.meta.env.VITE_BOOKING_GAS_URL || DEFAULT_BOOKING_GAS_URL;
-  const GAS_SECRET_STATIC = import.meta.env.VITE_BOOKING_GAS_SECRET || '';
+  const GAS_URL_STATIC = BOOKING_GAS_URL;
+  const GAS_SECRET_STATIC = BOOKING_GAS_SECRET;
 
   const cacheKey = (() => {
     const start = dateRange && dateRange[0] ? dateRange[0].startOf('day').valueOf() : '';
@@ -489,8 +490,7 @@ export default function Bookings() {
     let ok = false;
     try {
       setUpdating(bookingId);
-      const DEFAULT_BOOKING_GAS_URL ="https://script.google.com/macros/s/AKfycbzAn8Ahu2Mp59Uh0i7jLi1XEzRU44A6xzrMl3X-n1u_EECxSAWCjpNo0Ovk4LeCjvPzeA/exec";
-      const GAS_URL = import.meta.env.VITE_BOOKING_GAS_URL || DEFAULT_BOOKING_GAS_URL;
+      const GAS_URL = BOOKING_GAS_URL;
       const SECRET = import.meta.env.VITE_BOOKING_GAS_SECRET || '';
       // Mirror patch keys to exact Sheet headers to ensure update reflects
       const p = patch || {};
@@ -532,8 +532,7 @@ export default function Bookings() {
 
   // Minimal upload helper to GAS (same endpoint used by BookingForm)
   const uploadFileToGAS = async (file) => {
-    const DEFAULT_BOOKING_GAS_URL = "https://script.google.com/macros/s/AKfycbzAn8Ahu2Mp59Uh0i7jLi1XEzRU44A6xzrMl3X-n1u_EECxSAWCjpNo0Ovk4LeCjvPzeA/exec";
-    const GAS_URL = import.meta.env.VITE_BOOKING_GAS_URL || DEFAULT_BOOKING_GAS_URL;
+    const GAS_URL = BOOKING_GAS_URL;
     const SECRET = import.meta.env.VITE_BOOKING_GAS_SECRET || '';
     if (!GAS_URL) throw new Error('GAS URL not configured');
     const fd = new FormData();

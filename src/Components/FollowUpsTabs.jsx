@@ -2,6 +2,7 @@ import React from 'react';
 import { Tabs } from 'antd';
 import { FileTextOutlined, ToolOutlined, CalendarOutlined } from '@ant-design/icons';
 import FollowUps from './FollowUps';
+import { buildModuleUrl } from "../config/gasEndpoints";
 
 export default function FollowUpsTabs() {
   const tabLabel = (icon, text) => (
@@ -11,14 +12,8 @@ export default function FollowUpsTabs() {
     </span>
   );
 
-  const DEFAULT_QUOT_URL =
-    'https://script.google.com/macros/s/AKfycbxXtfRVEFeaKu10ijzfQdOVlgkZWyH1q1t4zS3PHTX9rQQ7ztRJdpFV5svk98eUs3UXuw/exec';
-  const DEFAULT_JC_URL =
-    'https://script.google.com/macros/s/AKfycbwFqLWDHtZqh_s8LzYoKyD3k0J6ycVcnrtcQYMdK08UcCWzQqMl-mucIA4jnEKxTttDlg/exec';
-  const QUOT_URL = import.meta.env.VITE_QUOTATION_GAS_URL || DEFAULT_QUOT_URL;
-  const JC_URL = import.meta.env.VITE_JOBCARD_GAS_URL || DEFAULT_JC_URL;
-  const DEFAULT_BOOKING_URL =
-    import.meta.env.VITE_BOOKING_GAS_URL || 'https://script.google.com/macros/s/AKfycbzAn8Ahu2Mp59Uh0i7jLi1XEzRU44A6xzrMl3X-n1u_EECxSAWCjpNo0Ovk4LeCjvPzeA/exec';
+  const QUOT_URL = buildModuleUrl("quotation", import.meta.env.VITE_QUOTATION_GAS_URL);
+  const JC_URL = buildModuleUrl("jobcard", import.meta.env.VITE_JOBCARD_GAS_URL);
 
   const items = [
     {

@@ -6,6 +6,7 @@ import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { exportToCsv } from "../utils/csvExport";
 import { normalizeKey, uniqCaseInsensitive, toKeySet } from "../utils/caseInsensitive";
+import { buildModuleUrl } from "../config/gasEndpoints";
 
 const { Text } = Typography;
 
@@ -28,6 +29,8 @@ const HEAD = {
 };
 
 const pick = (obj, aliases) => String(aliases.map((k) => obj[k] ?? "").find((v) => v !== "") || "").trim();
+const QUOTATION_GAS_URL = buildModuleUrl("quotation", import.meta.env.VITE_QUOTATION_GAS_URL);
+const QUOTATION_GAS_SECRET = import.meta.env.VITE_QUOTATION_GAS_SECRET || "";
 
 export default function Quotations() {
   const screens = Grid.useBreakpoint();
@@ -88,13 +91,10 @@ export default function Quotations() {
     return `Quotations:list:${JSON.stringify({ branchFilter, modeFilter, statusFilter, q: debouncedQ||'', start, end, page, pageSize, USE_SERVER_PAG })}`;
   })();
 
-  const gasConfig = useMemo(() => {
-    const DEFAULT_QUOT_URL =
-      "https://script.google.com/macros/s/AKfycbxXtfRVEFeaKu10ijzfQdOVlgkZWyH1q1t4zS3PHTX9rQQ7ztRJdpFV5svk98eUs3UXuw/exec";
-    const GAS_URL = import.meta.env.VITE_QUOTATION_GAS_URL || DEFAULT_QUOT_URL;
-    const SECRET = import.meta.env.VITE_QUOTATION_GAS_SECRET || '';
-    return { GAS_URL, SECRET };
-  }, []);
+  const gasConfig = useMemo(() => ({
+    GAS_URL: QUOTATION_GAS_URL,
+    SECRET: QUOTATION_GAS_SECRET,
+  }), [QUOTATION_GAS_URL, QUOTATION_GAS_SECRET]);
 
   const mapRow = useCallback((o, idx = 0) => {
     const obj = (o && o.values) ? o.values : o; // support {values,payload}
@@ -671,7 +671,3 @@ function parseTsMs(v) {
   }
   return null;
 }
-  // GAS endpoints (same as used for list)
-  const DEFAULT_QUOT_URL = "https://script.google.com/macros/s/AKfycbxXtfRVEFeaKu10ijzfQdOVlgkZWyH1q1t4zS3PHTX9rQQ7ztRJdpFV5svk98eUs3UXuw/exec";
-  const GAS_URL = import.meta.env.VITE_QUOTATION_GAS_URL || DEFAULT_QUOT_URL;
-  const GAS_SECRET = import.meta.env.VITE_QUOTATION_GAS_SECRET || '';

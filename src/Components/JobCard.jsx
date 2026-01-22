@@ -31,6 +31,8 @@ import { saveJobcardViaWebhook, reserveJobcardSerial } from "../apiCalls/forms";
 import { GetCurrentUser } from "../apiCalls/users";
 import { getBranch, listBranchesPublic } from "../apiCalls/branches";
 import { listUsersPublic } from "../apiCalls/adminUsers";
+import { normalizeBranchId } from "../utils/branchHelpers";
+import { buildModuleUrl } from "../config/gasEndpoints";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -41,23 +43,15 @@ const { Option } = Select;
 
 // Apps Script Web App URL (default set here; env can override)
 // Default Job Card GAS URL
-const DEFAULT_JOBCARD_GAS_URL =
-  "https://script.google.com/macros/s/AKfycbwFqLWDHtZqh_s8LzYoKyD3k0J6ycVcnrtcQYMdK08UcCWzQqMl-mucIA4jnEKxTttDlg/exec";
-const JOBCARD_GAS_URL = import.meta.env.VITE_JOBCARD_GAS_URL || DEFAULT_JOBCARD_GAS_URL;
+const JOBCARD_GAS_URL = buildModuleUrl("jobcard", import.meta.env.VITE_JOBCARD_GAS_URL);
 const JOBCARD_GAS_SECRET = import.meta.env.VITE_JOBCARD_GAS_SECRET || "";
 
 // Google Form constants removed — now using Apps Script webhook
 
 // Branches
 const BRANCHES = [
-  "Byadarahalli",
-  "Kadabagere",
-  "Muddinapalya",
-  "Andrahalli",
-  "Tavarekere",
-  "Hegganahalli",
-  "Channenahalli",
-  "Nelagadrahalli",
+  "Chikkagollarahatti",
+  "Pattagepalya",
 ];
 
 // Fallback list used for owner/admin executive dropdown when API not loaded
@@ -239,9 +233,8 @@ function buildWelcomeMsg(vals, totals) {
     ? `*Customer Observations:*\n${obsLines.map((s) => `- ${s}`).join("\n")}\n\n`
     : "";
 
-  const isNH = String(branch).trim() === "Byadarahalli";
-  const showroomEn = isNH ? "NH Motors" : "Shantha Motors";
-  const showroomKn = isNH ? "ಎನ್ ಎಚ್ ಮೋಟರ್ಸ್" : "ಶಾಂತ ಮೋಟರ್ಸ್";
+  const showroomEn = "SRI BALAJI MOTORS";
+  const showroomKn = "ಶ್ರೀ ಬಾಲಾಜಿ ಮೋಟರ್ಸ್";
 
   return (
     `Hi ${name}! 👋\n\n` +
@@ -393,7 +386,7 @@ function buildPostServiceMsg(vals, totals, labourRows, paymentsSummary = {}) {
 
   // Final WhatsApp message following the requested template
   const lines = [
-    `⭐️ *Shantha Motors* — ಶಾಂತ ಮೋಟರ್ಸ್`,
+    `⭐️ *SRI BALAJI MOTORS* — ಶ್ರೀ ಬಾಲಾಜಿ ಮೋಟರ್ಸ್`,
     `Multi Brand Two Wheeler Sales & Service`,
     `────────────────────────`,
     `*✔️ Service Invoice*`,
@@ -421,7 +414,7 @@ function buildPostServiceMsg(vals, totals, labourRows, paymentsSummary = {}) {
     ``,
     `────────────────────────`,
     ``,
-    `🙏 Thank you for choosing *Shantha Motors*!`,
+    `🙏 Thank you for choosing *SRI BALAJI MOTORS*!`,
     `ಧನ್ಯವಾದಗಳು ❤️`,
     `— ${exec}, ${branch}${execPhone ? ` (☎️ ${execPhone})` : ''}`,
   ];
@@ -794,18 +787,19 @@ export default function JobCard({ initialValues = null } = {}) {
           if (codeFromUser) { setBranchCode(codeFromUser); try { form.setFieldsValue({ branchCode: codeFromUser }); } catch {
             //gef
           } }
-          const branchIdVar = (user?.formDefaults && (user.formDefaults.branchId?._id || user.formDefaults.branchId || null))
+          const branchIdSource = (user?.formDefaults && (user.formDefaults.branchId?._id || user.formDefaults.branchId || null))
             || (user?.primaryBranch && (user.primaryBranch?._id || user.primaryBranch || null))
             || (Array.isArray(user?.branches) && user.branches.length ? (user.branches[0]?._id || user.branches[0] || null) : null);
-          if (branchIdVar) {
+          const branchIdResolved = normalizeBranchId(branchIdSource);
+          if (branchIdResolved) {
             try {
-              const br = await getBranch(String(branchIdVar)).catch(() => null);
+              const br = await getBranch(branchIdResolved).catch(() => null);
               if (br?.success && br?.data) {
                 if (!branchName) branchName = br.data.name;
                 if (br?.data?.code && !branchCode) {
                   const code = String(br.data.code).toUpperCase();
                   setBranchCode(code);
-                  setBranchId(String(br.data.id || branchIdVar));
+                  setBranchId(String(br.data.id || branchIdResolved));
                   try { form.setFieldsValue({ branchCode: code }); } catch {
                     //aoibfiha
                   }
@@ -858,11 +852,6 @@ export default function JobCard({ initialValues = null } = {}) {
   // If branch/executive ever get cleared by a reset, restore from defaults
   const watchedBranch = Form.useWatch('branch', form);
   const watchedExec = Form.useWatch('executive', form);
-  const isNHBranch = String(watchedBranch || defaultBranchName || '')
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, '')
-    .includes('byadarahalli');
   useEffect(() => {
     const patch = {};
     if (!watchedBranch && defaultBranchName) patch.branch = defaultBranchName;
@@ -1681,7 +1670,7 @@ export default function JobCard({ initialValues = null } = {}) {
           >
             <div>
               <Title level={4} style={{ margin: 0 }}>
-                {isNHBranch ? "NH MOTORS — JOB CARD" : "SHANTHA MOTORS — JOB CARD"}
+              SRI BALAJI MOTORS — JOB CARD
               </Title>
               <Text type="secondary">Multi Brand Two Wheeler Sales & Service</Text>
             </div>

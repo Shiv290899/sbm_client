@@ -3,6 +3,7 @@ import dayjs from 'dayjs'
 import { Table, Button, Space, Modal, Form, Input, InputNumber, message, Popconfirm, Alert, Typography, Tag, Select } from 'antd'
 import { ReloadOutlined, PlusOutlined, EditOutlined } from '@ant-design/icons'
 import { exportToCsv } from '../utils/csvExport'
+import { buildModuleUrl } from "../config/gasEndpoints"
 
 const { Text } = Typography
 
@@ -112,7 +113,7 @@ const normalizeRow = (row = {}) => {
 }
 
 export default function VehicleCatalogManager({ csvFallbackUrl }) {
-  const GAS_URL = import.meta.env.VITE_VEHICLE_CATALOG_GAS_URL || 'https://script.google.com/macros/s/AKfycbw0zvptYU-X0yBRFytBJZeli0Dr-uOBFDSfpYgQeWv7nKMWXD73piVndyyTiARU0FL-Lg/exec'
+  const GAS_URL = buildModuleUrl("vehicleCatalog", import.meta.env.VITE_VEHICLE_CATALOG_GAS_URL)
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -131,7 +132,7 @@ export default function VehicleCatalogManager({ csvFallbackUrl }) {
 
   const listVehicleCatalog = async () => {
     if (!GAS_URL) throw new Error('VEHICLE_CATALOG_GAS_URL is not configured')
-    const url = `${GAS_URL}?action=list`
+    const url = `${GAS_URL}&action=list`
     const res = await fetch(url, { method: 'GET', mode: 'cors', credentials: 'omit' })
     if (!res.ok) throw new Error('Failed to fetch catalog')
     return res.json()

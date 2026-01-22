@@ -107,7 +107,7 @@ function doGet(e) {
 
 // ===================== CONFIG / HEADERS =====================
 
-const SHEET_NAME = 'Sheet1';
+const SHEET_NAME = 'Bookings';
 const SPREADSHEET_ID = ''; // leave '' if bound to spreadsheet
 const DRIVE_FOLDER_ID = '1VMnnv-2zYwX4j3k4JSC_Qc6Il7xYaRsT';
 

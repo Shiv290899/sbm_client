@@ -12,7 +12,7 @@ import {
 } from "../data/contactInfo";
 
 /**
- * Shantha Motors - Heroic Home
+ * SRI BALAJI MOTORS - Heroic Home
  * Built with plain React + CSS-in-JS styles for quick drop-in.
  * Sections:
  *  - Neon glass hero with marquee
@@ -570,7 +570,7 @@ export default function Home() {
     },
     {
       stage: "Experience",
-      copy: "Instant test rides scheduled from your nearest Shantha Motors experience center.",
+      copy: "Instant test rides scheduled from your nearest SRI BALAJI MOTORS experience center.",
     },
     {
       stage: "Purchase",
@@ -613,7 +613,7 @@ export default function Home() {
       {!isMobile && (
         <div style={styles.navWrap}>
           <div style={{ ...styles.container, ...styles.nav }}>
-            <div style={styles.logo}>SHANTHA MOTORS</div>
+            <div style={styles.logo}>SRI BALAJI MOTORS</div>
             <button type="button" style={styles.burger} onClick={() => document.getElementById("offerings")?.scrollIntoView({ behavior: "smooth" })}>
               <div style={{ display: "grid", gap: 4 }}>
                 <span style={{ height: 2, width: 20, background: "#131417", display: "block" }} />
@@ -690,7 +690,7 @@ export default function Home() {
 
       <div style={styles.container}>
         <section style={styles.section}>
-          <h2 style={styles.sectionTitle}>Why Riders Choose Shantha Motors</h2>
+          <h2 style={styles.sectionTitle}>Why Riders Choose SRI BALAJI MOTORS</h2>
           <p style={styles.sectionSub}>A premium dealership journey built on trust, transparency and tech-enabled service.</p>
 
           <div style={styles.highlightGrid}>
@@ -717,7 +717,7 @@ export default function Home() {
                 Speak with an advisor now - curated vehicle options, EMI plans and service packages shared in minutes.
               </p>
             </div>
-            <a href={SALES_TEL_LINK || "tel:+919731366921"} style={styles.ribbonCta}>Call Sales Desk</a>
+            <a href={SALES_TEL_LINK || "tel:+919742192972"} style={styles.ribbonCta}>Call Sales Desk</a>
           </div>
         </section>
       </div>
@@ -779,7 +779,7 @@ export default function Home() {
 
       <div style={styles.container}>
         <section style={styles.section}>
-          <h2 style={styles.sectionTitle}>Your Shantha Motors Journey</h2>
+          <h2 style={styles.sectionTitle}>Your SRI BALAJI MOTORS Journey</h2>
           <p style={styles.sectionSub}>We stay with you at every milestone - from first test ride to scheduled service.</p>
 
           <div style={styles.journeyGrid}>
@@ -805,7 +805,7 @@ export default function Home() {
           <div style={styles.visitGrid}>
             <iframe
               style={styles.mapFrame}
-              title="Shantha Motors Map"
+              title="SRI BALAJI MOTORS Map"
               loading="lazy"
               src={mapEmbedUrl}
               allowFullScreen
@@ -841,9 +841,9 @@ export default function Home() {
           id="about"
         >
           <div>
-            <h2 style={styles.sectionTitle}>About Shantha Motors</h2>
+            <h2 style={styles.sectionTitle}>About SRI BALAJI MOTORS</h2>
             <p style={styles.sectionSub}>
-              Shantha Motors began in 2022 with one compact outlet and a promise to make premium two-wheelers and transparent servicing accessible to every rider in Bengaluru.
+              SRI BALAJI MOTORS began in 2022 with one compact outlet and a promise to make premium two-wheelers and transparent servicing accessible to every rider in Bengaluru.
               In just a few years we have grown into a multi-brand network that blends curated bikes, quick finance approvals and certified workshops equipped for EV diagnostics.
               Our rider-first crew keeps the journey personal with doorstep pick-ups, real-time updates and a culture that treats every delivery like day one.
             </p>
@@ -928,13 +928,13 @@ export default function Home() {
 
       <div style={styles.container}>
         <footer style={styles.footer}>
-          <div>© {new Date().getFullYear()} Shantha Motors. All rights reserved.</div>
+          <div>© {new Date().getFullYear()} SRI BALAJI MOTORS. All rights reserved.</div>
         </footer>
       </div>
 
       <a
         style={styles.whatsapp}
-        href={SALES_WHATSAPP_LINK || "https://wa.me/919731366921"}
+        href={SALES_WHATSAPP_LINK || "https://wa.me/919742192972"}
         target="_blank"
         rel="noreferrer"
         aria-label="Chat on WhatsApp"

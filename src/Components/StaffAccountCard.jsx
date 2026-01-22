@@ -1,14 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Card, Space, Typography, message, Button, Divider, Tag, Tooltip, Progress, Modal, Table, Grid } from 'antd';
 import { saveJobcardViaWebhook } from '../apiCalls/forms';
+import { buildModuleUrl } from "../config/gasEndpoints";
 
 const { Text } = Typography;
 
 export default function StaffAccountCard() {
   const screens = Grid.useBreakpoint();
   const isMobile = !screens.md;
-  const DEFAULT_JC_URL = 'https://script.google.com/macros/s/AKfycbwFqLWDHtZqh_s8LzYoKyD3k0J6ycVcnrtcQYMdK08UcCWzQqMl-mucIA4jnEKxTttDlg/exec';
-  const GAS_URL = import.meta.env.VITE_JOBCARD_GAS_URL || DEFAULT_JC_URL;
+  const GAS_URL = buildModuleUrl("jobcard", import.meta.env.VITE_JOBCARD_GAS_URL);
   const SECRET = import.meta.env.VITE_JOBCARD_GAS_SECRET || '';
 
   const [data, setData] = useState({ bookingAmountPending:0, jcAmountPending:0, minorSalesAmountPending:0, totalPending:0, prevDueAssigned:0 });

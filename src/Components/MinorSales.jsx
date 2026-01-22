@@ -4,11 +4,12 @@ import { handleSmartPrint } from "../utils/printUtils";
 import MinorSalesPrintSheet from "./MinorSalesPrintSheet";
 import { saveBookingViaWebhook } from "../apiCalls/forms";
 import { GetCurrentUser } from "../apiCalls/users";
+import { buildModuleUrl } from "../config/gasEndpoints";
 
 // Optional: Configure your Minor Sales Google Apps Script Web App URL via Vite env
 // Add to client/.env (vite-project/.env):
 //   VITE_MINOR_SALES_GAS_URL=https://script.google.com/macros/s/YOUR_ID/exec
-const MINOR_SALES_GAS_URL = import.meta.env.VITE_MINOR_SALES_GAS_URL || "https://script.google.com/macros/s/AKfycbzUYgfSeU54u65-wYXCFUAnlCCX9jUnbRYC3DhKrexWBi5wLJzbKlghU1TrfuChGtbc/exec"; // empty -> offline mode
+const MINOR_SALES_GAS_URL = buildModuleUrl("minorsales", import.meta.env.VITE_MINOR_SALES_GAS_URL);
 
 const phoneRule = [
   { required: true, message: "Mobile number is required" },

@@ -1,4 +1,4 @@
-export const SALES_NUMBERS = ["9731366921", "8073283502"];
+export const SALES_NUMBERS = ["9742192972", "9901925546"];
 
 export const SALES_PRIMARY = SALES_NUMBERS[0];
 export const SALES_SECONDARY = SALES_NUMBERS[1];
@@ -24,4 +24,4 @@ export const SALES_WHATSAPP_LINK = (() => {
 })();
 
 export const BUSINESS_HOURS = "Mon-Sat: 9:00 AM - 8:30 PM - Sun: 9:00 AM - 2:30 PM";
-export const CONTACT_EMAIL = "hello@shanthamotors.com";
+export const CONTACT_EMAIL = "punithbhandimane50@gmail.com";

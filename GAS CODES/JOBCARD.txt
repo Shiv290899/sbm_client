@@ -3,7 +3,7 @@ function doPost(e){ return handle_(e) }
 
 // If bound to the sheet, keep blank. Otherwise set your spreadsheet ID.
 const SHEET_ID = '';
-const SHEET_NAME = 'Sheet1';
+const SHEET_NAME = 'Job Quotes';
 
 // Default headers (used only when the sheet is empty).
 // Existing sheets are read dynamically and not overwritten.

@@ -14,11 +14,8 @@ import { fmtDate, inr } from "../utils/printUtils";
  * breakdown (cash/online with ref). One-page A4. Labels with inline values.
  */
 const BookingPrintSheet = forwardRef(function BookingPrintSheet({ active = true, vals = {} }, ref) {
-  // Normalize brand by branch (Byadarahalli => NH Motors)
   const branchRaw = String(vals?.branch || "").trim();
   const branch = branchRaw;
-  const branchKey = branchRaw.toLowerCase();
-  const isNH = branchKey === "byadarahalli";
 
   // Customer
   const custName =
@@ -216,28 +213,24 @@ img { max-width: 100%; height: auto; background: transparent; }
           <div className="box">
             <div className="hdr">
               <img
-                src={isNH ? "/honda-logo.png" : "/shantha-logoprint.jpg"}
-                alt={isNH ? "NH Motors" : "Shantha Motors"}
+                src="/sri-balaji-logoprint.jpg"
+                alt="SRI BALAJI MOTORS"
                 style={{ width: "100%", maxHeight: 92 }}
               />
               <div className="shop">
-                {isNH ? (
-                  <>
-                    <div className="en">NH MOTORS | ಎನ್ ಎಚ್ ಮೋಟರ್ಸ್</div>
-                    <div className="sub" style={{ marginTop: 4 }}>
-                      Site No. 116/1, Bydarahalli, Magadi Main Road, Opp.<br />
-                      HP Petrol Bunk, Bangalore - 560091
-                    </div>
-                    <div className="sub">Mob: 9731366921 / 8073283502 / 9741609799</div>
-                  </>
-                ) : (
-                  <>
-                    <div className="en">SHANTHA MOTORS | ಶಾಂತ ಮೋಟರ್ಸ್</div>
-                    <div className="sub">Multi Brand Two Wheeler Sales &amp; Service</div>
-                    <div className="sub">Mob No : 9731366921 / 8073283502</div>
-                    <div className="tiny">Kadabagere • Muddinapalya  • Andrahalli • Tavarekere • Hegganahalli • Channenahalli • Nelagadrahalli</div>
-                  </>
-                )}
+                <div className="en">SRI BALAJI MOTORS | ಶ್ರೀ ಬಾಲಾಜಿ ಮೋಟರ್ಸ್</div>
+                <div className="sub" style={{ marginTop: 4 }}>
+                  Multi Brand Bike Showroom
+                </div>
+                <div className="sub">
+                  #1, Below SBI Bank, Opp. to Sai Garments, Near NICE Road, Magadi Main Road, Chikkagollarahatti, Bangalore - 560091
+                </div>
+                <div className="sub">
+                  Mob: 9742192972 / 9901925546
+                </div>
+                <div className="tiny">
+                  Chikkagollarahatti • Pattegarapalya 
+                </div>
               </div>
               <div>
                 <img src="/location-qr.png" alt="Location QR" style={{ width: "100%", maxHeight: 92 }} />
@@ -372,7 +365,7 @@ img { max-width: 100%; height: auto; background: transparent; }
             <div className="sign-row">
               <div className="sign tiny">Customer Signature</div>
               <div className="sign tiny">
-                {isNH ? "For NH Motors" : "For Shantha Motors"} — Authorised Signatory
+                For SRI BALAJI MOTORS — Authorised Signatory
               </div>
             </div>
           </div>

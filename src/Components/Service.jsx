@@ -108,7 +108,7 @@ export default function Service() {
               <Title level={1} style={{ marginBottom: 0 }}>Service</Title>
               <Title level={2} style={{ marginTop: 8 }}>We love to care for your ride.</Title>
               <Paragraph type="secondary">
-                Shantha Motors operates manufacturer‑grade workshops with trained technicians,
+                SRI BALAJI MOTORS operates manufacturer‑grade workshops with trained technicians,
                 genuine spares and modern diagnostic tools. From routine service to accident repair,
                 we’ve got you covered.
               </Paragraph>
@@ -323,7 +323,7 @@ export default function Service() {
         <div style={container}>
           <Title level={2}>Roadside Assistance</Title>
           <Paragraph type="secondary">
-            Stuck with a puncture, drained battery or breakdown? Call us — we’ll help on the spot or arrange towing to the nearest Shantha Motors workshop.
+            Stuck with a puncture, drained battery or breakdown? Call us — we’ll help on the spot or arrange towing to the nearest SRI BALAJI MOTORS workshop.
           </Paragraph>
           <Row gutter={[16, 16]} style={{ marginTop: 12 }}>
             {[
@@ -349,7 +349,7 @@ export default function Service() {
       <section id="engine-health" style={section}>
         <div style={container}>
           <Title level={2}>Engine Health Assurance</Title>
-          <Paragraph type="secondary">Assurance on engine work carried out at Shantha Motors after the standard/extended warranty period.</Paragraph>
+          <Paragraph type="secondary">Assurance on engine work carried out at SRI BALAJI MOTORS after the standard/extended warranty period.</Paragraph>
           <Row gutter={[16, 16]} style={{ marginTop: 12 }}>
             {[
               { big: "1 Year", sub: "or 12,000 km (whichever earlier)" },
@@ -432,7 +432,7 @@ export default function Service() {
         <div style={container}>
           <Divider style={{ marginTop: 0 }} />
           <Space size="large" wrap>
-            <Text>© {new Date().getFullYear()} Shantha Motors</Text>
+            <Text>© {new Date().getFullYear()} SRI BALAJI MOTORS</Text>
             <a href="#terms">Terms & Conditions</a>
             <a href="#">Privacy</a>
           </Space>

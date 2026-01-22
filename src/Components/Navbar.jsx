@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom"; // <-- added useNavigate
+import { SALES_DISPLAY } from "../data/contactInfo";
 // ^ We import useNavigate to programmatically redirect after sign-out.
 //   Link/location are already used for routing and active styling.
 
@@ -113,8 +114,8 @@ export default function Navbar() {
 
   const [user, setUser] = React.useState(() => getCurrentUser());
   // Logo fallbacks to avoid repeated failing requests
-  const [logoSrc, setLogoSrc] = React.useState('/shantha-logo.jpg');
-  const [logoSmallSrc, setLogoSmallSrc] = React.useState('/shantha-logo.jpg');
+  const [logoSrc, setLogoSrc] = React.useState('/sri-balaji-logo.jpg');
+  const [logoSmallSrc, setLogoSmallSrc] = React.useState('/sri-balaji-logo.jpg');
   // ^ Holds the current user object or null when logged out.
 
   // Keep user state in sync when localStorage changes (e.g., in other tabs)
@@ -399,7 +400,7 @@ export default function Navbar() {
     { label: "Service", path: "/service" },
     { label: "Gallery", path: "/gallery" },
     { label: "Contact", path: "/contact" },
-    { label: "About Us", path: "/about-us" },
+    
   ];
   // ^ Your existing navigation items.
 
@@ -411,9 +412,9 @@ export default function Navbar() {
         <div style={styles.container}>
           {/* Contact + Hours */}
           <div style={styles.phoneRow}>
-            <div style={styles.topbarText}>
-              📞 Sales: <strong>9731366921 / 8073283502</strong>
-            </div>
+          <div style={styles.topbarText}>
+            📞 Sales: <strong>{SALES_DISPLAY}</strong>
+          </div>
             <div style={styles.hours}>
               ⏰ Mon–Sat: 9:00 AM – 8:30 PM • Sun: 9:00 AM – 2:30 PM
             </div>
@@ -429,16 +430,16 @@ export default function Navbar() {
             <div style={styles.logoWrap}>
               <img
                 src={logoSrc}
-                alt="Shantha Motors Logo"
+                alt="SRI BALAJI MOTORS Logo"
                 style={styles.logoImg}
                 onError={(e) => {
                   // graceful fallback if logo missing; prevent loops
                   e.currentTarget.onerror = null;
-                  setLogoSrc('https://via.placeholder.com/200x48?text=Shantha+Motors');
+                  setLogoSrc('https://via.placeholder.com/200x48?text=SRI+BALAJI+MOTORS');
                 }}
               />
               <div>
-                <div style={styles.brandTitle}>Shantha Motors</div>
+                <div style={styles.brandTitle}>SRI BALAJI MOTORS</div>
                 <div style={styles.tagline}>The Power of Trust</div>
               </div>
             </div>
@@ -614,11 +615,11 @@ export default function Navbar() {
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <img
               src={logoSmallSrc}
-              alt="Shantha Motors Logo"
+              alt="SRI BALAJI MOTORS Logo"
               style={{ height: 28, width: "auto" }}
               onError={(e) => {
                 e.currentTarget.onerror = null;
-                setLogoSmallSrc('https://via.placeholder.com/120x28?text=SM');
+                setLogoSmallSrc('https://via.placeholder.com/120x28?text=SRI+BALAJI');
               }}
             />
             <strong>Menu</strong>

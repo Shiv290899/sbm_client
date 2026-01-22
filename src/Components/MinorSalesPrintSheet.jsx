@@ -11,7 +11,6 @@ function fmtDate(d) {
 
 const MinorSalesPrintSheet = forwardRef(function MinorSalesPrintSheet({ active = true, vals = {} }, ref) {
   const branch = String(vals?.branchName || "").trim();
-  const isNH = branch === "Byadarahalli";
   const createdAt = vals?.dateTimeIso || new Date();
 
   const rows = Array.isArray(vals?.items) ? vals.items : [];
@@ -59,21 +58,14 @@ th { background: #fafafa; }
       <div className="wrap">
         <div className="box">
           <div className="hdr">
-            <img src={isNH ? "/honda-logo.png" : "/shantha-logoprint.jpg"} alt="Logo" style={{ width: "100%", maxHeight: 92 }} />
+            <img src="/sri-balaji-logoprint.jpg" alt="SRI BALAJI MOTORS" style={{ width: "100%", maxHeight: 92 }} />
             <div className="shop">
-              {isNH ? (
-                <>
-                  <div className="en">NH MOTORS | ಎನ್ ಎಚ್ ಮೋಟರ್ಸ್</div>
-                  <div className="sub">Site No. 116/1, Bydarahalli, Magadi Main Road, Opp.<br/>HP Petrol Bunk, Bangalore - 560091</div>
-                  <div className="sub">Mob: 9731366921 / 8073283502 / 9741609799</div>
-                </>
-              ) : (
-                <>
-                  <div className="en">SHANTHA MOTORS | ಶಾಂತ ಮೋಟರ್ಸ್</div>
-                  <div className="sub">Multi Brand Two Wheeler Sales & Service</div>
-                  <div className="sub">Mob No : 9731366921 / 8073283502</div>
-                </>
-              )}
+              <div className="en">SRI BALAJI MOTORS | ಶ್ರೀ ಬಾಲಾಜಿ ಮೋಟರ್ಸ್</div>
+              <div className="sub">Multi Brand Bike Showroom</div>
+              <div className="sub">
+                #1, Below SBI Bank, Opp. to Sai Garments, Near NICE Road, Magadi Main Road, Chikkagollarahatti, Bangalore - 560091
+              </div>
+              <div className="sub">Mob: 9742192972 / 9901925546</div>
             </div>
             <div>
               <img src="/location-qr.png" alt="QR" style={{ width: "100%", maxHeight: 92 }} />

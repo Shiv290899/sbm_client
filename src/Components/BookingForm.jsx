@@ -19,6 +19,7 @@ import {
   AutoComplete,
   Modal,
   Space,
+  Spin,
 } from "antd";
 import { InboxOutlined, CreditCardOutlined, PrinterOutlined } from "@ant-design/icons";
 import { listCurrentStocksPublic } from "../apiCalls/stocks";
@@ -30,7 +31,11 @@ import FetchBooking from "./FetchBooking";
 import BookingHistoryButton from "./BookingHistoryButton";
 import { handleSmartPrint } from "../utils/printUtils";
 import { normalizeKey, uniqCaseInsensitive } from "../utils/caseInsensitive";
+import { buildBookingFormPatch } from "../utils/bookingFormPrefill";
+import { consumeFollowUpBookingPrefill } from "../utils/followUpPrefill";
+import { useLocation } from "react-router-dom";
 import dayjs from "dayjs";
+import { buildModuleUrl } from "../config/gasEndpoints";
 
 const { Title, Text } = Typography;
 const { Dragger } = Upload;
@@ -118,9 +123,7 @@ const SHEET_CSV_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vQYGuNPY_2ivfS7MTX4bWiu1DWdF2mrHSCnmTznZVEHxNmsrgcGWjVZN4UDUTOzQQdXTnbeM-ylCJbB/pub?gid=408799621&single=true&output=csv";
 
 // Google Apps Script Web App endpoint to save bookings to Google Sheet
-const BOOKING_GAS_URL =
-  import.meta.env.VITE_BOOKING_GAS_URL ||
-  "https://script.google.com/macros/s/AKfycbzAn8Ahu2Mp59Uh0i7jLi1XEzRU44A6xzrMl3X-n1u_EECxSAWCjpNo0Ovk4LeCjvPzeA/exec";
+const BOOKING_GAS_URL = buildModuleUrl("booking", import.meta.env.VITE_BOOKING_GAS_URL);
 
 const BOOKING_GAS_SECRET = import.meta.env.VITE_BOOKING_GAS_SECRET || "";
 
@@ -225,6 +228,9 @@ export default function BookingForm({
   const isMobile = !screens.md;
   const isTabletOnly = screens.md && !screens.lg;
   const ctlSize = isMobile ? 'middle' : 'large';
+  const location = useLocation();
+  const autoFetchRequest = location.state?.autoFetch;
+  const [autoFetchLoading, setAutoFetchLoading] = useState(Boolean(autoFetchRequest));
 
   const [form] = Form.useForm();
   const [addressProofFiles, setAddressProofFiles] = useState([]);
@@ -237,6 +243,7 @@ export default function BookingForm({
   const [dynamicExecutives, setDynamicExecutives] = useState([]);
   const [dynamicLoading, setDynamicLoading] = useState(false);
   const [chassisLocked, setChassisLocked] = useState(false);
+  const followUpPrefillAppliedRef = useRef(false);
   const [activeBranchSet, setActiveBranchSet] = useState(null); // lower-case branch names
 
   // User context for auto-filling Executive and Branch
@@ -294,6 +301,54 @@ export default function BookingForm({
   const paymentReference2 = Form.useWatch("paymentReference2", form);
   const paymentReference3 = Form.useWatch("paymentReference3", form);
   const chassisNo = Form.useWatch("chassisNo", form);
+  const handleBookingApplied = useCallback(
+    ({ bookingId, mobile, vehicle }) => {
+      setPaymentsOnlyMode(true);
+      setEditRef({ bookingId: bookingId || null, mobile: mobile || null });
+      setHasFetchedBookingFlag(true);
+      const availability = String(vehicle?.availability || "").toLowerCase();
+      const chassisVal = vehicle?.chassisNo || form.getFieldValue("chassisNo");
+      const isAllot =
+        availability === "allot" || String(chassisVal || "") === "__ALLOT__";
+      const hasChassis = Boolean(chassisVal && String(chassisVal) !== "__ALLOT__");
+      setChassisLocked(Boolean(hasChassis && !isAllot));
+      message.info("Payments-only update mode enabled");
+    },
+    [form]
+  );
+
+  useEffect(() => {
+    if (!autoFetchRequest) return;
+    const onComplete = () => setAutoFetchLoading(false);
+    window.addEventListener("bookingPrefillComplete", onComplete);
+    return () => window.removeEventListener("bookingPrefillComplete", onComplete);
+  }, [autoFetchRequest]);
+
+  useEffect(() => {
+    if (followUpPrefillAppliedRef.current) return;
+    followUpPrefillAppliedRef.current = true;
+    const dispatchCompletion = () => {
+      if (typeof window === "undefined") return;
+      window.dispatchEvent(new CustomEvent("bookingPrefillComplete"));
+    };
+    const followUpData = consumeFollowUpBookingPrefill();
+    if (!followUpData?.payload) {
+      dispatchCompletion();
+      return;
+    }
+    try {
+      const { patch, metadata } = buildBookingFormPatch(followUpData.payload);
+      form.setFieldsValue(patch);
+      if (patch.company) setSelectedCompany?.(patch.company);
+      if (patch.bikeModel) setSelectedModel?.(patch.bikeModel);
+      message.success("Booking details filled.");
+      handleBookingApplied(metadata);
+      dispatchCompletion();
+    } catch (err) {
+      console.warn("Follow-up auto-prefill failed", err);
+      dispatchCompletion();
+    }
+  }, [form, handleBookingApplied, setSelectedCompany, setSelectedModel]);
 
   // Live-print watchers
   const wCustomerName = Form.useWatch("customerName", form);
@@ -1114,6 +1169,24 @@ export default function BookingForm({
         }
       });
 
+      const safeNumericValue = (value) => {
+        const n = Number(value);
+        return Number.isFinite(n) && n >= 0 ? n : 0;
+      };
+      const sumByMode = (mode) =>
+        paymentsExpanded.reduce((sum, entry) => {
+          if (String(entry?.mode || "")
+            .trim()
+            .toLowerCase() !== mode) {
+            return sum;
+          }
+          return sum + safeNumericValue(entry.amount);
+        }, 0);
+
+      const cashCollected = sumByMode("cash");
+      const onlineCollected = sumByMode("online");
+      const totalCollected = cashCollected + onlineCollected;
+
       // Legacy fields (mode/amount per partial) for backward compatibility
       const legacyPayments = parts.map((p) => ({
         amount: p.total || undefined,
@@ -1207,15 +1280,6 @@ export default function BookingForm({
         v: 1,
       };
 
-      // Pre-aggregate payment split for GAS (frontend-only approach)
-      const cashCollected = paymentsExpanded
-        .filter((p) => String(p.mode).toLowerCase() === 'cash')
-        .reduce((s, p) => s + (Number(p.amount) || 0), 0);
-      const onlineCollected = paymentsExpanded
-        .filter((p) => String(p.mode).toLowerCase() === 'online')
-        .reduce((s, p) => s + (Number(p.amount) || 0), 0);
-      const totalCollected = cashCollected + onlineCollected;
-
       const payload = {
         customerName: values.customerName,
         mobileNumber: values.mobileNumber,
@@ -1291,6 +1355,38 @@ export default function BookingForm({
         ...(editRef?.mobile ? { editMobile: editRef.mobile } : {}),
         ...(paymentsOnlyMode ? { action: 'update' } : {}),
       };
+
+      const normalizeNumber = (value) => {
+        const num = Number(value);
+        return Number.isFinite(num) ? num : 0;
+      };
+      const derivedTotalDp =
+        normalizeNumber(payload?.dp?.totalDp) ||
+        normalizeNumber(payload?.totalDp) ||
+        normalizeNumber(payload?.downPayment);
+      const derivedBalancedDp = Math.max(0, derivedTotalDp - totalCollected);
+
+      payload.cashCollected = cashCollected;
+      payload.onlineCollected = onlineCollected;
+      payload.totalCollected = totalCollected;
+      payload.totalDp = derivedTotalDp;
+      payload.balancedDp = derivedBalancedDp;
+      payload.dp = {
+        ...(payload.dp || {}),
+        totalDp: derivedTotalDp,
+        balancedDp: derivedBalancedDp,
+      };
+
+      rawPayloadObj.cashCollected = cashCollected;
+      rawPayloadObj.onlineCollected = onlineCollected;
+      rawPayloadObj.totalCollected = totalCollected;
+      rawPayloadObj.dp = {
+        ...(rawPayloadObj.dp || {}),
+        totalDp: derivedTotalDp,
+        balancedDp: derivedBalancedDp,
+      };
+
+      payload.rawPayload = JSON.stringify(rawPayloadObj);
 
       let ok = false;
       let resp;
@@ -2273,8 +2369,24 @@ export default function BookingForm({
         minHeight: "100dvh",
         display: "grid",
         alignItems: "start",
+        position: "relative",
       }}
     >
+      {autoFetchLoading && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 2000,
+            background: "rgba(255,255,255,0.88)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Spin tip="Fetching booking details..." size="large" />
+        </div>
+      )}
       <Card
         bordered={false}
         style={{
@@ -2310,17 +2422,8 @@ export default function BookingForm({
                 webhookUrl={BOOKING_GAS_URL}
                 setSelectedCompany={setSelectedCompany}
                 setSelectedModel={setSelectedModel}
-                onApplied={({ bookingId, mobile, vehicle }) => {
-                  setPaymentsOnlyMode(true);
-                  setEditRef({ bookingId: bookingId || null, mobile: mobile || null });
-                  setHasFetchedBookingFlag(true);
-                  const availability = String(vehicle?.availability || '').toLowerCase();
-                  const chassisVal = vehicle?.chassisNo || form.getFieldValue('chassisNo');
-                  const isAllot = availability === 'allot' || String(chassisVal || '') === '__ALLOT__';
-                  const hasChassis = Boolean(chassisVal && String(chassisVal) !== '__ALLOT__');
-                  setChassisLocked(Boolean(hasChassis && !isAllot));
-                  message.info('Payments-only update mode enabled');
-                }}
+                onApplied={handleBookingApplied}
+                autoSearch={autoFetchRequest}
               />
               <BookingHistoryButton
                 form={form}

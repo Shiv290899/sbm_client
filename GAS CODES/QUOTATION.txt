@@ -98,7 +98,7 @@ function doPost(e) {
  * Quotation Web App (no-duplicate upsert by Quotation_ID) with dedicated remark columns.
  */
 const SHEET_ID = ''; // leave '' if bound to the target Sheet
-const SHEET_NAME = 'Sheet1'; // change to your tab name
+const SHEET_NAME = 'Quotations'; // change to your tab name
 
 // Preferred headers (tolerate variations when reading/writing)
 const HEADERS = [
@@ -166,7 +166,7 @@ function idxRemarks_(headers) { return headerIndex_(headers, 'Remarks', /remarks
 function idxPayload_(headers) { return headerIndex_(headers, 'Payload', /payload/i); }
 function idxBranch_(headers) { return headerIndex_(headers, 'Branch', /branch/i); }
 function idxExecutive_(headers) { return headerIndex_(headers, 'Executive_Name', /executive/i); }
-function idxSerial_(headers) { return headerIndex_(headers, 'Quotation_ID', /(quotation[_\s]id|quotation\s(no|number)|serial(\s*no)?)/i); }
+function idxSerial_(headers) { return headerIndex_(headers, 'Quotation_ID', /(quotation[_\s]id|quotation\s(no|number)|serial(\s*no)?|booking[_\s]*(id|no))/i); }
 // Optional remark columns (auto-created on first write)
 function idxRemarkLevel_(headers) { return headerIndex_(headers, 'RemarkLevel', /remark.*level/i); }
 function idxRemarkText_(headers) { return headerIndex_(headers, 'RemarkText', /remark.*text/i); }
