@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Table, Space, Tag, Select, DatePicker, message, Modal, Input, Tooltip, Popover, Card, Typography, Segmented, Badge, Divider, Avatar, Progress, Spin, Grid } from 'antd';
+import { Alert, Avatar, Badge, Button, Card, DatePicker, Divider, Grid, Input, Modal, message, Popover, Progress, Select, Segmented, Space, Spin, Table, Tag, Tooltip, Typography } from 'antd';
 import { CheckCircleOutlined, ReloadOutlined, FilterOutlined, SearchOutlined, CalendarOutlined, ShopOutlined, PhoneOutlined, FileTextOutlined, ThunderboltOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { GetCurrentUser } from "../apiCalls/users";
@@ -132,6 +132,7 @@ export default function FollowUps({ mode = 'quotation', webhookUrl, onClose }) {
   const [allRows, setAllRows] = useState([]);
   const [hasCache, setHasCache] = useState(false);
   const [filter, setFilter] = useState('all'); // today | overdue | upcoming | all
+  const [followUpsError, setFollowUpsError] = useState('');
   // Show follow-ups based on Branch only (not executive)
   // Set to false so we never filter by executive name
   const [mineOnly,] = useState(false);
@@ -817,6 +818,7 @@ export default function FollowUps({ mode = 'quotation', webhookUrl, onClose }) {
 
   const fetchFollowUps = async () => {
     setLoading(true);
+    setFollowUpsError('');
     try {
       if (!webhookUrl) {
         // Optional: if webhook not configured, show empty list gracefully
@@ -845,6 +847,10 @@ export default function FollowUps({ mode = 'quotation', webhookUrl, onClose }) {
       })();
       let resp = await callWebhook({ method: 'GET', payload }).catch(() => null);
       let j = resp?.data || resp || {};
+      if (j && j.success === false) {
+        const err = j.message || 'Follow-ups webhook returned an error.';
+        throw new Error(err);
+      }
       let list = Array.isArray(j?.rows) ? j.rows : (Array.isArray(j?.data) ? j.data : []);
       // For jobcard we already call action=list above
       // Normalize various row shapes from webhook
@@ -1163,14 +1169,19 @@ export default function FollowUps({ mode = 'quotation', webhookUrl, onClose }) {
       // Client-side filtering as a fallback (in case webhook returns unfiltered rows)
       const startToday = dayjs().startOf('day');
       const endToday = dayjs().endOf('day');
-      const branchFilterNorm = branchFilterValue ? norm(branchFilterValue) : '';
+      const branchFilterNorm = (!isPrivilegedUser || branchFilterValue === 'all') ? '' : norm(branchFilterValue);
       const myBranchNorm = norm(resolvedMyBranch);
+      const sanitizeBranch = (value) => {
+        const normalized = norm(value);
+        if (!normalized || normalized === '-' || normalized === '—') return '';
+        return normalized;
+      };
       const matchesBranch = (row) => {
-        const rowBranch = norm(row?.branch);
+        const rowBranch = sanitizeBranch(row?.branch);
         if (!isPrivilegedUser) {
-          if (!myBranchNorm || rowBranch !== myBranchNorm) return false;
-        } else if (branchFilterNorm) {
-          if (rowBranch !== branchFilterNorm) return false;
+          if (myBranchNorm && rowBranch && rowBranch !== myBranchNorm) return false;
+        } else if (branchFilterNorm && rowBranch && rowBranch !== branchFilterNorm) {
+          return false;
         }
         return true;
       };
@@ -1214,7 +1225,10 @@ export default function FollowUps({ mode = 'quotation', webhookUrl, onClose }) {
       }
     } catch (e) {
       console.warn('followups fetch failed', e);
-      message.error('Could not fetch follow-ups. Check the Apps Script.');
+      const fallback = 'Could not fetch follow-ups. Check the Apps Script.';
+      const detail = e?.response?.data?.message || e?.message || fallback;
+      setFollowUpsError(detail);
+      message.error(fallback);
     } finally {
       setLoading(false);
     }
@@ -1844,6 +1858,18 @@ export default function FollowUps({ mode = 'quotation', webhookUrl, onClose }) {
         <div style={{ height: 12 }} />
 
         <Card style={softPanel} bodyStyle={{ padding: 0 }}>
+          {followUpsError && (
+            <div style={{ padding: '16px 24px 0' }}>
+              <Alert
+                type="error"
+                showIcon
+                message="Follow-ups unavailable"
+                description={followUpsError}
+                closable
+                onClose={() => setFollowUpsError('')}
+              />
+            </div>
+          )}
           <Table
             rowKey={(r)=>String(r.key)}
             dataSource={filteredRows}

@@ -1,6 +1,6 @@
 const BASE_GAS_URL =
   import.meta.env.VITE_UNIFIED_GAS_URL ||
-  "https://script.google.com/macros/s/AKfycbxiwCHyrl1JztqHKwVbvb-W0mVuG38jhHqL_eo8Fprnu6FpAm0qXyyqUw5E0CstPo3b/exec";
+  "https://script.google.com/macros/s/AKfycbzDbmJ-DXA2nTfKaKl2-GjUPSd9AxmNmjlaJUH53JOQQVrOGoEy1KqdiiCkVK-2_8Tr/exec";
 
 const ensureModuleParam = (base, moduleName) => {
   if (!moduleName) return base;

@@ -1976,7 +1976,7 @@ function doPost(e){ return handle_(e) }
 
 // If bound to the sheet, keep blank. Otherwise set your spreadsheet ID.
 const JOBCARD_SHEET_ID = '';
-const JOBCARD_SHEET_NAME = 'Job Quotes';
+const JOBCARD_SHEET_NAME = 'Jobcards';
 
 // Default headers (used only when the sheet is empty).
 // Existing sheets are read dynamically and not overwritten.
@@ -6310,7 +6310,6 @@ const MODULE_ALIAS = {
   minorsales: 'minorsales',
   minor: 'minorsales',
   quotation: 'quotation',
-  quotes: 'quotation',
   stock: 'stocks',
   stocks: 'stocks',
   vehiclecatalog: 'vehicleCatalog',
